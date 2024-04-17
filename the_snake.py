@@ -79,7 +79,7 @@ class Snake(GameObject):  # класс, описывающий объект Зм
         self.x, self.y = self.direction
         # получаем координату головы
         self.new_direction = ((self.head[0] + self.x), (self.head[1] + self.y))
-        self.positions.insert(self.new_direction)
+        self.positions.insert(-1, self.new_direction)
         
         
 
@@ -160,7 +160,7 @@ def main():
         # Тут опишите основную логику игры.
         # ...
 
-
+"""Выполнение main"""
 if __name__ == '__main__':
     main()
 
