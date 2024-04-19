@@ -45,13 +45,11 @@ clock = pygame.time.Clock()
 
 
 class GameObject():  # класс, описывающий игровые объекты
-    """Класс игрового объекта"""
-    position = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)  # централизуется позиция
-    body_color = (0, 0, 0)  # дефолтный цвет
+    """Класс игрового объекта"""  
 
-    def __init__(self, x_coord, y_coord):  # инициализация объекта
-        self.x_coord = x_coord
-        self.y_coord = y_coord
+    def __init__(self, position, body_color):  # инициализация объекта
+        self.position = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
+        self.body_color = (0, 0, 0)
 
     def draw(self):  # метод отрисовки объекта, пустой
         pass
@@ -61,13 +59,13 @@ class Snake(GameObject):  # класс, описывающий объект Зм
     """Класс змейки"""
     lenght = 1
     positions = [(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)]  # список позиций змейки
-    last = positions[:-1]
     direction = RIGHT
     next_direction = None
 
-    def __init__(self, x_coord, y_coord):
-        super().__init__(x_coord, y_coord)
+    def __init__(self):
+        self.position = self.get_head_position()
         self.body_color = SNAKE_COLOR
+        self.last = self.get_last_position()
 
     def update_direction(self):  # изменение направления
         if self.next_direction:
@@ -75,12 +73,30 @@ class Snake(GameObject):  # класс, описывающий объект Зм
             self.next_direction = None
 
     def move(self):  # обновляет позицию змейки
-        self.head = self.get_head_position()
-        self.x, self.y = self.direction
-        # получаем координату головы
-        self.new_direction = ((self.head[0] + self.x), (self.head[1] + self.y))
-        self.positions.insert(-1, self.new_direction)
-        
+        self.last = self.get_last_position()
+        self.head = self.get_head_position()  # голова
+        self.head_x, self.head_y = self.head
+        if self.next_direction:
+            self.x, self.y = self.next_direction  # направление
+        elif self.next_direction is None:
+            self.x, self.y = self.direction
+        self.new_direction = ((self.head_x + self.x * GRID_SIZE),
+                              (self.head_y + self.y * GRID_SIZE))
+        self.new_x, self.new_y = self.new_direction
+        # вычисляем новую координату
+        if self.new_x == SCREEN_WIDTH:
+            self.new_x = 0
+        elif self.new_x == 0:
+            self.new_x = SCREEN_WIDTH
+        if self.new_y == SCREEN_HEIGHT:
+            self.new_y = 0
+        elif self.new_y == 0:
+            self.new_y = SCREEN_HEIGHT
+        self.new_direction = self.new_x, self.new_y
+        self.positions.insert(0, self.new_direction)
+        self.positions.pop(len(self.positions) - 1)
+
+        # добавляем новую координату в список позиций
         
 
     def draw(self):  # отрисовка головы змейки
@@ -101,6 +117,9 @@ class Snake(GameObject):  # класс, описывающий объект Зм
     def get_head_position(self):  # возвращает голову, первый элемент
         return self.positions[0]
 
+    def get_last_position(self):  # возвращаем последний кусок змеи
+        return self.positions[-1]
+
     def reset(self):  # сброс змейки в начальное состояние
         self.positions = Snake.positions
         return self.positions
@@ -109,14 +128,15 @@ class Snake(GameObject):  # класс, описывающий объект Зм
 class Apple(GameObject):  # класс, описывающий обхъект Яблоко
     """Класс яблока"""
     
-    def __init__(self, x_coord, y_coord):
-        super().__init__(x_coord, y_coord)
+    def __init__(self):
         self.body_color = APPLE_COLOR
+        
 
     def randomize_position():  # рандомит координаты и выдает их кортежем
-        x_coord = randint(0, GRID_WIDTH) * GRID_SIZE
-        y_coord = randint(0, GRID_HEIGHT) * GRID_SIZE
-        return (x_coord, y_coord)
+        return (
+            randint(0, GRID_WIDTH) * GRID_SIZE,
+            randint(0, GRID_HEIGHT) * GRID_SIZE
+        )
     
     position = randomize_position()
 
@@ -146,17 +166,25 @@ def main():
     """Логика игры"""
     # Тут нужно создать экземпляры классов.
     running = True
-    apple = Apple(1, 1)
-    snake = Snake(1, 1)
+    apple = Apple()
+    snake = Snake()
 
     while running:
         apple.draw()
         snake.draw()
-        while handle_keys(snake):
-            snake.update_direction()
-            snake.move()
+        if apple.position == snake.get_head_position():
+            apple.draw()
+        handle_keys(snake)
+        snake.update_direction()
+        snake.move()
+        # if snake.get_head_position() == apple.position:
+        #     snake.lenght += 1
+        #     apple.randomize_position()
+        #     screen.fill(BOARD_BACKGROUND_COLOR)
+        #     apple.draw()
+        #     snake.draw()
         pygame.display.update()
-        clock.tick(SPEED)
+        clock.tick(5)
         # Тут опишите основную логику игры.
         # ...
 
