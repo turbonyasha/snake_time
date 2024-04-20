@@ -74,8 +74,8 @@ class Snake(GameObject):  # класс, описывающий объект Зм
 
     def move(self):  # обновляет позицию змейки
         self.last = self.get_last_position()
-        self.head = self.get_head_position()  # голова
-        self.head_x, self.head_y = self.head
+        self.snake_head = self.get_head_position()  # голова
+        self.head_x, self.head_y = self.snake_head
         if self.next_direction:
             self.x, self.y = self.next_direction  # направление
         elif self.next_direction is None:
@@ -93,11 +93,23 @@ class Snake(GameObject):  # класс, описывающий объект Зм
         elif self.new_y == 0:
             self.new_y = SCREEN_HEIGHT
         self.new_direction = self.new_x, self.new_y
+        # добавляем новую координату в список позиций
         self.positions.insert(0, self.new_direction)
+        # удаляем последнюю координату из списка
         self.positions.pop(len(self.positions) - 1)
 
-        # добавляем новую координату в список позиций
+
+    def collapse_check(self):  # проверяем на столкновение
+        snake_head = self.get_head_position()
+        if snake_head in self.positions[1:]:
+            return True
+        else:
+            return False
         
+    def add_next_snake_piece(self):  # добавляем квардат в змейку
+        self.lenght += 1
+        self.positions.append(self.positions[-1])
+
 
     def draw(self):  # отрисовка головы змейки
         for position in self.positions[:-1]:
@@ -125,20 +137,20 @@ class Snake(GameObject):  # класс, описывающий объект Зм
         return self.positions
 
 
-class Apple(GameObject):  # класс, описывающий обхъект Яблоко
+class Apple(GameObject):  # класс, описывающий объект Яблоко
     """Класс яблока"""
     
     def __init__(self):
         self.body_color = APPLE_COLOR
+        self.position = self.randomize_position()
         
 
-    def randomize_position():  # рандомит координаты и выдает их кортежем
+    def randomize_position(self):  # рандомит координаты и выдает их кортежем
         return (
             randint(0, GRID_WIDTH) * GRID_SIZE,
             randint(0, GRID_HEIGHT) * GRID_SIZE
         )
-    
-    position = randomize_position()
+
 
     def draw(self):  # отрисовка яблока
         rect = pygame.Rect(self.position, (GRID_SIZE, GRID_SIZE))
@@ -170,21 +182,30 @@ def main():
     snake = Snake()
 
     while running:
-        apple.draw()
-        snake.draw()
-        if apple.position == snake.get_head_position():
+
+        # проверяем генерацию яблока на змейке
+        if apple.position in snake.positions:
+            apple.position = apple.randomize_position()
             apple.draw()
+        else:
+            apple.draw()
+        snake.draw()
         handle_keys(snake)
         snake.update_direction()
         snake.move()
-        # if snake.get_head_position() == apple.position:
-        #     snake.lenght += 1
-        #     apple.randomize_position()
-        #     screen.fill(BOARD_BACKGROUND_COLOR)
-        #     apple.draw()
-        #     snake.draw()
+        
+        # проверяем на съедение
+        if apple.position == snake.get_head_position():
+            apple.position = apple.randomize_position()
+            snake.add_next_snake_piece()
+
+
+        # проверяем на врезание
+        if snake.collapse_check():
+            snake.positions = snake.reset()
+
         pygame.display.update()
-        clock.tick(5)
+        clock.tick(SPEED)
         # Тут опишите основную логику игры.
         # ...
 
