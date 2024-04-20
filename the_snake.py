@@ -80,23 +80,12 @@ class Snake(GameObject):  # класс, описывающий объект Зм
             self.x, self.y = self.next_direction  # направление
         elif self.next_direction is None:
             self.x, self.y = self.direction
-        self.new_direction = ((self.head_x + self.x * GRID_SIZE),
-                              (self.head_y + self.y * GRID_SIZE))
-        self.new_x, self.new_y = self.new_direction
-        # вычисляем новую координату
-        if self.new_x == SCREEN_WIDTH:
-            self.new_x = 0
-        elif self.new_x == 0:
-            self.new_x = SCREEN_WIDTH
-        if self.new_y == SCREEN_HEIGHT:
-            self.new_y = 0
-        elif self.new_y == 0:
-            self.new_y = SCREEN_HEIGHT
-        self.new_direction = self.new_x, self.new_y
+        self.new_direction = (((self.head_x + self.x * GRID_SIZE) % SCREEN_WIDTH),
+                              ((self.head_y + self.y * GRID_SIZE) % SCREEN_HEIGHT))
         # добавляем новую координату в список позиций
         self.positions.insert(0, self.new_direction)
         # удаляем последнюю координату из списка
-        self.positions.pop(len(self.positions) - 1)
+        self.positions.pop()
 
 
     def collapse_check(self):  # проверяем на столкновение
@@ -147,8 +136,8 @@ class Apple(GameObject):  # класс, описывающий объект Яб
 
     def randomize_position(self):  # рандомит координаты и выдает их кортежем
         return (
-            randint(0, GRID_WIDTH) * GRID_SIZE,
-            randint(0, GRID_HEIGHT) * GRID_SIZE
+            (randint(0, GRID_WIDTH) * GRID_SIZE) % SCREEN_WIDTH,
+            (randint(0, GRID_HEIGHT) * GRID_SIZE) % SCREEN_HEIGHT
         )
 
 
@@ -205,7 +194,7 @@ def main():
             snake.positions = snake.reset()
 
         pygame.display.update()
-        clock.tick(SPEED)
+        clock.tick(5)
         # Тут опишите основную логику игры.
         # ...
 
