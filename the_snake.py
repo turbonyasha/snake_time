@@ -41,11 +41,12 @@ class GameObject:
         self.position = DEFAULT_POSITION
         self.body_color = BOARD_BACKGROUND_COLOR
 
-    def draw_cell(self, position, body_color=BOARD_BACKGROUND_COLOR):
+    def draw_cell(self, position, body_color=BOARD_BACKGROUND_COLOR,
+                  border_color=BORDER_COLOR):
         """Метод отрисовки одного элемента объекта (клетки)."""
         rect = (pg.Rect(position, (GRID_SIZE, GRID_SIZE)))
         pg.draw.rect(screen, body_color, rect)
-        pg.draw.rect(screen, BORDER_COLOR, rect, 1)
+        pg.draw.rect(screen, border_color, rect, 1)
 
     def draw(self):
         """Абстрактный метод draw для отрисовки объектов."""
@@ -83,27 +84,27 @@ class Snake(GameObject):
                                % SCREEN_WIDTH),
                               ((self.head_y + self.y * GRID_SIZE)
                                % SCREEN_HEIGHT))
-        self.positions.insert(0, self.new_direction)
-        self.positions.pop()
+        if len(self.positions) < self.lenght:
+            self.positions.insert(0, self.new_direction)
+        else:
+            self.positions.insert(0, self.new_direction)
+            self.positions.pop()
 
-    def add_next_snake_piece(self):
-        """Метод, добавляющий в змейку новый элемент."""
-        """При съедании яблока, вызывается данный метод и добавляет"""
-        """в конец змеи координату её последнего положения,"""
-        """добавляя таким образом новый сегмент."""
-        self.lenght += 1
-        self.positions.append(self.positions[-1])
+    # def add_next_snake_piece(self):
+    #     """Метод, добавляющий в змейку новый элемент."""
+    #     """При съедании яблока, вызывается данный метод и добавляет"""
+    #     """в конец змеи координату её последнего положения,"""
+    #     """добавляя таким образом новый сегмент."""
+    #     self.lenght += 1
+    #     self.positions.append(self.positions[-1])
 
     def draw(self):
         """Метод, отрисовывающий змейку на игровом поле."""
-        # self.draw_cell(self.get_head_position(), SNAKE_COLOR, BORDER_COLOR)
-        # self.draw_cell(self.get_last_position(), SNAKE_COLOR, BORDER_COLOR)
-        for position in self.positions:
-            self.draw_cell(position, SNAKE_COLOR)
+        self.draw_cell(self.get_head_position(), SNAKE_COLOR, BORDER_COLOR)
+        self.draw_cell(self.get_last_position(), SNAKE_COLOR, BORDER_COLOR)
 
         if self.last:
-            last_rect = pg.Rect(self.last, (GRID_SIZE, GRID_SIZE))
-            pg.draw.rect(screen, BOARD_BACKGROUND_COLOR, last_rect)
+            self.draw_cell(self.last, border_color=BOARD_BACKGROUND_COLOR)
 
     def get_head_position(self):
         """Метод, возвращающий координаты головы змейки."""
@@ -127,12 +128,14 @@ class Apple(GameObject):
         super().__init__(body_color=APPLE_COLOR)
         self.randomize_position()
 
-    def randomize_position(self):
+    def randomize_position(self, position=DEFAULT_POSITION):
         """Метод, определяющий позицию яблока."""
         self.position = (
             (randint(0, GRID_WIDTH) * GRID_SIZE) % SCREEN_WIDTH,
             (randint(0, GRID_HEIGHT) * GRID_SIZE) % SCREEN_HEIGHT
         )
+        if self.position == position:
+            self.randomize_position()
 
     def draw(self):
         """Метод отрисовки яблока."""
@@ -164,9 +167,6 @@ def main():
 
     while True:
 
-        if apple.position in snake.positions:
-            apple.position = apple.randomize_position()
-            apple.draw()
         apple.draw()
         snake.draw()
         handle_keys(snake)
@@ -175,7 +175,8 @@ def main():
 
         if apple.position == snake.get_head_position():
             apple.randomize_position()
-            snake.add_next_snake_piece()
+            # snake.add_next_snake_piece()
+            snake.lenght += 1
 
         snake_head = snake.get_head_position()
         if snake_head in snake.positions[2:]:
