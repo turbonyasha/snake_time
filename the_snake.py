@@ -1,6 +1,7 @@
 """Файл с реализацией игры Змейка."""
 from random import randint
 import pygame as pg
+import sys
 
 
 SCREEN_WIDTH, SCREEN_HEIGHT = 640, 480
@@ -90,14 +91,6 @@ class Snake(GameObject):
             self.positions.insert(0, self.new_direction)
             self.positions.pop()
 
-    # def add_next_snake_piece(self):
-    #     """Метод, добавляющий в змейку новый элемент."""
-    #     """При съедании яблока, вызывается данный метод и добавляет"""
-    #     """в конец змеи координату её последнего положения,"""
-    #     """добавляя таким образом новый сегмент."""
-    #     self.lenght += 1
-    #     self.positions.append(self.positions[-1])
-
     def draw(self):
         """Метод, отрисовывающий змейку на игровом поле."""
         self.draw_cell(self.get_head_position(), SNAKE_COLOR, BORDER_COLOR)
@@ -147,7 +140,7 @@ def handle_keys(game_object):
     for event in pg.event.get():
         if event.type == pg.QUIT:
             pg.quit()
-            raise SystemExit
+            sys.exit(0)
         elif event.type == pg.KEYDOWN:
             if event.key == pg.K_UP and game_object.direction != DOWN:
                 game_object.next_direction = UP
@@ -157,6 +150,8 @@ def handle_keys(game_object):
                 game_object.next_direction = LEFT
             elif event.key == pg.K_RIGHT and game_object.direction != LEFT:
                 game_object.next_direction = RIGHT
+            elif event.key == pg.K_ESCAPE:
+                sys.exit(0)
 
 
 def main():
@@ -175,7 +170,6 @@ def main():
 
         if apple.position == snake.get_head_position():
             apple.randomize_position()
-            # snake.add_next_snake_piece()
             snake.lenght += 1
 
         snake_head = snake.get_head_position()
