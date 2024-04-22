@@ -219,11 +219,10 @@ def main():
             snake.add_next_snake_piece()
 
         # проверяем на врезание змейки в себя
-        if snake.collapse_check():
-            snake.reset()
+        snake.collapse_check()
 
         pygame.display.update()
-        clock.tick(SPEED)
+        clock.tick(5)
 
 
 """Выполнение main"""
