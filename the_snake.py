@@ -47,7 +47,7 @@ clock = pygame.time.Clock()
 class GameObject():  # класс, описывающий игровые объекты
     """Класс игрового объекта игры Змейка"""
 
-    def __init__(self, position, body_color):  # инициализация объекта
+    def __init__(self, position=None, body_color=BOARD_BACKGROUND_COLOR):
         """Инициализация объекта класса GameObject"""
         self.position = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
         self.body_color = BOARD_BACKGROUND_COLOR
