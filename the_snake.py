@@ -88,6 +88,9 @@ class Snake(GameObject):
 
     def add_next_snake_piece(self):
         """Метод, добавляющий в змейку новый элемент."""
+        """При съедании яблока, вызывается данный метод и добавляет"""
+        """в конец змеи координату её последнего положения,"""
+        """добавляя таким образом новый сегмент."""
         self.lenght += 1
         self.positions.append(self.positions[-1])
 
@@ -117,7 +120,7 @@ class Snake(GameObject):
 class Apple(GameObject):
     """Класс, описывающий отъект Яблоко, дочерний от GameObject."""
 
-    def __init__(self):
+    def __init__(self, position=DEFAULT_POSITION, body_color=None):
         """Инициализация объекта Яблоко."""
         super().__init__(body_color=APPLE_COLOR)
         self.randomize_position()
