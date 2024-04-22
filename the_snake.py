@@ -111,10 +111,7 @@ class Snake(GameObject):
     def reset(self):
         """Метод, сбрасывающий змейку в начальное состояние."""
         screen.fill(BOARD_BACKGROUND_COLOR)
-        self.positions = [(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)]
-        self.lenght = Snake.lenght
-        self.direction = Snake.direction
-        self.new_direction = Snake.next_direction
+        Snake.__init__(self)
 
 
 class Apple(GameObject):
@@ -123,11 +120,10 @@ class Apple(GameObject):
     def __init__(self):
         """Инициализация объекта Яблоко."""
         super().__init__(body_color=APPLE_COLOR)
-        self.position = self.randomize_position()
+        self.randomize_position()
 
     def randomize_position(self):
         """Метод, определяющий позицию яблока."""
-
         self.position = (
             (randint(0, GRID_WIDTH) * GRID_SIZE) % SCREEN_WIDTH,
             (randint(0, GRID_HEIGHT) * GRID_SIZE) % SCREEN_HEIGHT
@@ -158,11 +154,10 @@ def handle_keys(game_object):
 def main():
     """Логика игры."""
     pg.init()
-    running = True
     apple = Apple()
     snake = Snake()
 
-    while running:
+    while True:
 
         if apple.position in snake.positions:
             apple.position = apple.randomize_position()
