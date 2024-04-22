@@ -1,6 +1,6 @@
 """Файл с реализацией игры Змейка"""
 
-from random import choice, randint
+from random import randint
 import pygame
 
 # Инициализация PyGame:
@@ -52,8 +52,14 @@ class GameObject():  # класс, описывающий игровые объ�
         self.position = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
         self.body_color = BOARD_BACKGROUND_COLOR
 
+    def draw_cell(self, position):
+        """Метод отрисовки одного элемента объекта (клетки)"""
+        rect = (pygame.Rect(position, (GRID_SIZE, GRID_SIZE)))
+        pygame.draw.rect(screen, self.body_color, rect)
+        pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
+
     def draw(self):  # метод отрисовки объекта, пустой
-        """Абстрактный метод draw"""
+        """Абстрактный метод draw для отрисовки объектов"""
         pass
 
 
@@ -106,30 +112,18 @@ class Snake(GameObject):
     def collapse_check(self):
         """Метод, проверяющий столкновение змеи и самой собой"""
         snake_head = self.get_head_position()
-        for pos in self.positions[1:]:
-            if snake_head == pos:
-                return True
-            else:
-                return False
-# не работает, срабатывает на съедание яблока
+        if snake_head in self.positions[2:]:
+            self.reset()
 
     def add_next_snake_piece(self):
         """Метод, добавляющий в змейку новый элемент"""
         self.lenght += 1
         self.positions.append(self.positions[-1])
-# куда еще присобачить lenght
 
     def draw(self):
         """Метод, отрисовывающий змейку на игровом поле"""
-        for position in self.positions[:-1]:
-            rect = (pygame.Rect(position, (GRID_SIZE, GRID_SIZE)))
-            pygame.draw.rect(screen, self.body_color, rect)
-            pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
-
-        head_rect = pygame.Rect(self.positions[0], (GRID_SIZE, GRID_SIZE))
-        pygame.draw.rect(screen, self.body_color, head_rect)
-        pygame.draw.rect(screen, BORDER_COLOR, head_rect, 1)
-# нужно реализовать отрисовку не через for, а через draw_cell
+        for position in self.positions:
+            self.draw_cell(position)
 
     # затирание последнего сегмента
         if self.last:
@@ -146,9 +140,15 @@ class Snake(GameObject):
 
     def reset(self):
         """Метод, сбрасывающий змейку в начальное состояние"""
-        self.positions = Snake.positions
-        return self.positions
-# не работает, ничего не происходит
+        # обновляем поле
+        screen.fill(BOARD_BACKGROUND_COLOR)
+        # обновляем нулевую позицию согласно тз
+        self.positions = [(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)]
+        # обновляем длину змеи
+        self.lenght = Snake.lenght
+        # обновляем направление змеи на стандартное
+        self.direction = Snake.direction
+        self.new_direction = Snake.next_direction
 
 
 class Apple(GameObject):
@@ -168,9 +168,7 @@ class Apple(GameObject):
 
     def draw(self):
         """Метод отрисовки яблока"""
-        rect = pygame.Rect(self.position, (GRID_SIZE, GRID_SIZE))
-        pygame.draw.rect(screen, self.body_color, rect)
-        pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
+        self.draw_cell(self.position)
 
 
 def handle_keys(game_object):
@@ -222,10 +220,10 @@ def main():
 
         # проверяем на врезание змейки в себя
         if snake.collapse_check():
-            running = False
+            snake.reset()
 
         pygame.display.update()
-        clock.tick(5)
+        clock.tick(SPEED)
 
 
 """Выполнение main"""
