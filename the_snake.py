@@ -222,7 +222,7 @@ def main():
         snake.collapse_check()
 
         pygame.display.update()
-        clock.tick(5)
+        clock.tick(SPEED)
 
 
 """Выполнение main"""
