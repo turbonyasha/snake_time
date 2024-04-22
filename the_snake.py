@@ -41,10 +41,10 @@ class GameObject:
         self.position = DEFAULT_POSITION
         self.body_color = BOARD_BACKGROUND_COLOR
 
-    def draw_cell(self, position):
+    def draw_cell(self, position, body_color=BOARD_BACKGROUND_COLOR):
         """Метод отрисовки одного элемента объекта (клетки)."""
         rect = (pg.Rect(position, (GRID_SIZE, GRID_SIZE)))
-        pg.draw.rect(screen, self.body_color, rect)
+        pg.draw.rect(screen, body_color, rect)
         pg.draw.rect(screen, BORDER_COLOR, rect, 1)
 
     def draw(self):
@@ -96,8 +96,10 @@ class Snake(GameObject):
 
     def draw(self):
         """Метод, отрисовывающий змейку на игровом поле."""
+        # self.draw_cell(self.get_head_position(), SNAKE_COLOR, BORDER_COLOR)
+        # self.draw_cell(self.get_last_position(), SNAKE_COLOR, BORDER_COLOR)
         for position in self.positions:
-            self.draw_cell(position)
+            self.draw_cell(position, SNAKE_COLOR)
 
         if self.last:
             last_rect = pg.Rect(self.last, (GRID_SIZE, GRID_SIZE))
@@ -134,7 +136,7 @@ class Apple(GameObject):
 
     def draw(self):
         """Метод отрисовки яблока."""
-        self.draw_cell(self.position)
+        self.draw_cell(self.position, APPLE_COLOR)
 
 
 def handle_keys(game_object):
