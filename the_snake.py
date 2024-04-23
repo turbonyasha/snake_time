@@ -1,6 +1,7 @@
 """Файл с реализацией игры Змейка."""
-from random import randint
+from random import choice, randint
 import pygame as pg
+
 import sys
 
 
@@ -24,6 +25,10 @@ SNAKE_COLOR = (0, 255, 0)
 
 DEFAULT_POSITION = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
 
+ALL_SCREEN_CELLS = set((x, y)
+                       for x in range(0, SCREEN_WIDTH, GRID_SIZE)
+                       for y in range(0, SCREEN_HEIGHT, GRID_SIZE))
+
 SPEED = 20
 
 screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
@@ -37,10 +42,10 @@ class GameObject:
     """Класс игрового объекта игры Змейка."""
 
     def __init__(self, position=DEFAULT_POSITION,
-                 body_color=None):
+                 body_color=BOARD_BACKGROUND_COLOR):
         """Инициализация объекта класса GameObject."""
-        self.position = DEFAULT_POSITION
-        self.body_color = BOARD_BACKGROUND_COLOR
+        self.position = position
+        self.body_color = body_color
 
     def draw_cell(self, position, body_color=BOARD_BACKGROUND_COLOR,
                   border_color=BORDER_COLOR):
@@ -51,7 +56,11 @@ class GameObject:
 
     def draw(self):
         """Абстрактный метод draw для отрисовки объектов."""
-        raise NotImplementedError
+        try:
+            raise NotImplementedError
+        except NotImplementedError:
+            print(f'В классе {self.__class__.__name__}'
+                  f'метод не переопределен!')
 
 
 class Snake(GameObject):
@@ -59,12 +68,9 @@ class Snake(GameObject):
 
     def __init__(self):
         """Инициализация объекта Змейка."""
-        super().__init__(position=DEFAULT_POSITION, body_color=SNAKE_COLOR)
-        self.last = None
-        self.lenght = 1
-        self.positions = [DEFAULT_POSITION]
-        self.direction = RIGHT
-        self.next_direction = None
+        super().__init__(body_color=SNAKE_COLOR)
+        self.reset()
+        self.positions = [self.position]
 
     def update_direction(self):
         """Изменение направления змейки."""
@@ -74,7 +80,6 @@ class Snake(GameObject):
 
     def move(self):
         """Метод, описывающий движение змейки по полю."""
-        self.last = self.get_last_position()
         self.snake_head = self.get_head_position()
         self.head_x, self.head_y = self.snake_head
         if self.next_direction:
@@ -87,14 +92,14 @@ class Snake(GameObject):
                                % SCREEN_HEIGHT))
         if len(self.positions) < self.lenght:
             self.positions.insert(0, self.new_direction)
+            self.last = None
         else:
             self.positions.insert(0, self.new_direction)
-            self.positions.pop()
+            self.last = self.positions.pop()
 
     def draw(self):
         """Метод, отрисовывающий змейку на игровом поле."""
         self.draw_cell(self.get_head_position(), SNAKE_COLOR, BORDER_COLOR)
-        self.draw_cell(self.get_last_position(), SNAKE_COLOR, BORDER_COLOR)
 
         if self.last:
             self.draw_cell(self.last, border_color=BOARD_BACKGROUND_COLOR)
@@ -103,14 +108,13 @@ class Snake(GameObject):
         """Метод, возвращающий координаты головы змейки."""
         return self.positions[0]
 
-    def get_last_position(self):
-        """Метод, возвращающий координаты хвоста змейки."""
-        return self.positions[-1]
-
     def reset(self):
         """Метод, сбрасывающий змейку в начальное состояние."""
-        screen.fill(BOARD_BACKGROUND_COLOR)
-        Snake.__init__(self)
+        self.positions = [DEFAULT_POSITION]
+        self.last = None
+        self.lenght = 1
+        self.direction = RIGHT
+        self.next_direction = None
 
 
 class Apple(GameObject):
@@ -125,10 +129,10 @@ class Apple(GameObject):
         """Метод, определяющий позицию яблока."""
         self.position = (
             (randint(0, GRID_WIDTH) * GRID_SIZE) % SCREEN_WIDTH,
-            (randint(0, GRID_HEIGHT) * GRID_SIZE) % SCREEN_HEIGHT
-        )
-        if self.position == position:
-            self.randomize_position()
+            (randint(0, GRID_HEIGHT) * GRID_SIZE) % SCREEN_HEIGHT)
+        while self.position in position:
+            free_cells = ALL_SCREEN_CELLS - set(position)
+            self.position = choice(list(free_cells))
 
     def draw(self):
         """Метод отрисовки яблока."""
@@ -151,7 +155,7 @@ def handle_keys(game_object):
             elif event.key == pg.K_RIGHT and game_object.direction != LEFT:
                 game_object.next_direction = RIGHT
             elif event.key == pg.K_ESCAPE:
-                sys.exit(0)
+                sys.exit('Нажата клавиша ESC, произведен выход.')
 
 
 def main():
@@ -174,10 +178,11 @@ def main():
 
         snake_head = snake.get_head_position()
         if snake_head in snake.positions[2:]:
+            screen.fill(BOARD_BACKGROUND_COLOR)
             snake.reset()
 
         pg.display.update()
-        clock.tick(5)
+        clock.tick(SPEED)
 
 
 """Выполнение main."""
