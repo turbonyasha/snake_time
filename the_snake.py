@@ -1,6 +1,6 @@
 """Файл с реализацией игры Змейка."""
 import sys
-from random import choice, randint
+from random import randint
 
 import pygame as pg
 
@@ -84,7 +84,7 @@ class Snake(GameObject):
                               ((self.head_y + self.y * GRID_SIZE)
                                % SCREEN_HEIGHT))
         self.positions.insert(0, self.new_direction)
-        self.last = (None if len(self.positions) < self.lenght
+        self.last = (None if len(self.positions) <= self.lenght
                      else self.positions.pop())
 
     def draw(self):
@@ -117,15 +117,10 @@ class Apple(GameObject):
 
     def randomize_position(self, position=DEFAULT_POSITION):
         """Метод, определяющий позицию яблока."""
-        # self.position = (
-        #     (randint(0, GRID_WIDTH) * GRID_SIZE) % SCREEN_WIDTH,
-        #     (randint(0, GRID_HEIGHT) * GRID_SIZE) % SCREEN_HEIGHT)
-        # if isinstance(position, list):
-        #     position = [DEFAULT_POSITION]
-        # while self.position in position:
-        self.position = (
-            (randint(0, GRID_WIDTH) * GRID_SIZE) % SCREEN_WIDTH,
-            (randint(0, GRID_HEIGHT) * GRID_SIZE) % SCREEN_HEIGHT)
+        while self.position in position:
+            self.position = (
+                (randint(0, GRID_WIDTH) * GRID_SIZE) % SCREEN_WIDTH,
+                (randint(0, GRID_HEIGHT) * GRID_SIZE) % SCREEN_HEIGHT)
 
     def draw(self):
         """Метод отрисовки яблока."""
@@ -166,7 +161,7 @@ def main():
         snake.move()
 
         if apple.position == snake.get_head_position():
-            apple.randomize_position()
+            apple.randomize_position(snake.positions)
             snake.lenght += 1
 
         snake_head = snake.get_head_position()
