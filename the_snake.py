@@ -52,9 +52,9 @@ class GameObject:
 
     def draw(self):
         """Абстрактный метод draw для отрисовки объектов."""
-        raise NotImplementedError(f'В классе'
+        raise NotImplementedError('В классе'
                                   f'{self.__class__.__name__}'
-                                  f'метод не переопределен!')
+                                  'метод не переопределен!')
 
 
 class Snake(GameObject):
@@ -110,10 +110,10 @@ class Snake(GameObject):
 class Apple(GameObject):
     """Класс, описывающий отъект Яблоко, дочерний от GameObject."""
 
-    def __init__(self, position=DEFAULT_POSITION, body_color=None):
+    def __init__(self, body_color=None):
         """Инициализация объекта Яблоко."""
         super().__init__(body_color=APPLE_COLOR)
-        self.randomize_position(position)
+        self.randomize_position([self.position])
 
     def randomize_position(self, position=DEFAULT_POSITION):
         """Метод, определяющий позицию яблока."""
